@@ -18,6 +18,9 @@ Usage
 
     # Resume / different checkpoint name
     python scripts/train.py --checkpoint checkpoints/run2.pt
+
+    # Also write metrics JSON (same payload as the pickle)
+    python scripts/train.py --results-json results/train_results.json
 """
 from __future__ import annotations
 import argparse
@@ -37,6 +40,7 @@ from codeswitch.config import (
 from codeswitch.data import build_datasets, make_collate_fn
 from codeswitch.evaluate import evaluate, evaluate_per_pair, print_sigma_summary
 from codeswitch.model import XLMRCodeSwitchPredictor
+from codeswitch.results_json import save_results_json
 from codeswitch.trainer import compute_class_weights, set_seed, train_epoch
 from torch.utils.data import DataLoader
 from transformers import XLMRobertaTokenizer
@@ -76,6 +80,8 @@ def parse_args() -> argparse.Namespace:
                    help="Path to save best model checkpoint")
     p.add_argument("--results",        default="results/train_results.pkl",
                    help="Path to save final results + history")
+    p.add_argument("--results-json", default=None, metavar="PATH",
+                   help="Also save the same metrics payload as JSON (optional)")
     return p.parse_args()
 
 
@@ -225,14 +231,20 @@ def main() -> None:
     # Persist results
     results_path = Path(args.results)
     results_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "history":          history,
+        "train_results":    final_train,
+        "zeroshot_results": final_zs,
+        "best_switch_f1":   best_sw_f1,
+    }
     with open(results_path, "wb") as f:
-        pickle.dump({
-            "history":          history,
-            "train_results":    final_train,
-            "zeroshot_results": final_zs,
-            "best_switch_f1":   best_sw_f1,
-        }, f)
+        pickle.dump(payload, f)
     print(f"\n✓ Results saved to: {results_path}")
+
+    if args.results_json:
+        json_path = Path(args.results_json)
+        save_results_json(json_path, payload)
+        print(f"✓ Results (JSON) saved to: {json_path}")
 
 
 if __name__ == "__main__":

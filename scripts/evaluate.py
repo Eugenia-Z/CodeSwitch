@@ -17,6 +17,11 @@ Usage
     python scripts/evaluate.py \\
         --checkpoint checkpoints/best_xlmr.pt \\
         --output results/eval_results.pkl
+
+    # JSON only (no pickle)
+    python scripts/evaluate.py \\
+        --checkpoint checkpoints/best_xlmr.pt \\
+        --results-json results/eval_results.json
 """
 from __future__ import annotations
 import argparse
@@ -31,6 +36,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from codeswitch.config import TRAIN_PAIRS, ZEROSHOT_PAIRS, ModelConfig, TrainConfig, parse_pair
 from codeswitch.evaluate import evaluate_per_pair, print_sigma_summary
 from codeswitch.model import XLMRCodeSwitchPredictor
+from codeswitch.results_json import save_results_json
 from transformers import XLMRobertaTokenizer
 
 
@@ -59,6 +65,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--num-workers",    type=int,   default=tc.num_workers)
     p.add_argument("--output",         default=None,
                    help="Save results dict to this pickle path (optional)")
+    p.add_argument("--results-json", default=None, metavar="PATH",
+                   help="Save the same metrics as JSON (optional; can be used without --output)")
     return p.parse_args()
 
 
@@ -96,12 +104,19 @@ def main() -> None:
 
     print_sigma_summary(train_results, zs_results)
 
+    payload = {"train_results": train_results, "zeroshot_results": zs_results}
+
     if args.output:
         out = Path(args.output)
         out.parent.mkdir(parents=True, exist_ok=True)
         with open(out, "wb") as f:
-            pickle.dump({"train_results": train_results, "zeroshot_results": zs_results}, f)
+            pickle.dump(payload, f)
         print(f"\n✓ Results saved to: {out}")
+
+    if args.results_json:
+        json_path = Path(args.results_json)
+        save_results_json(json_path, payload)
+        print(f"✓ Results (JSON) saved to: {json_path}")
 
 
 if __name__ == "__main__":
