@@ -1,0 +1,61 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.whl
+pip-wheel-metadata/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ML / model artifacts
+*.pt
+*.pth
+*.bin
+*.ckpt
+checkpoints/
+runs/
+wandb/
+mlruns/
+outputs/
+
+# Data files
+*.csv
+*.tsv
+*.json
+*.jsonl
+data/
+datasets/
+
+# Logs
+*.log
+logs/
+
+# Environment variables / secrets
+.env
+.env.*
+secrets.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
