@@ -85,12 +85,13 @@ python scripts/preprocess.py --output data/small.pkl --max-samples 500
 python scripts/train.py \
   --data data/preprocessed.pkl \
   --checkpoint checkpoints/best_xlmr.pt \
-  --results results/train_results.pkl
+  --results results/train_results.pkl \
+  --results-json results/train_results.json
 ```
 
-Useful flags (see `python scripts/train.py --help`): `--epochs`, `--batch-size`, `--train-pairs`, `--zeroshot-pairs`, `--lambda-dur`, `--freeze-encoder`, etc.
+Useful flags (see `python scripts/train.py --help`): `--epochs`, `--batch-size`, `--train-pairs`, `--zeroshot-pairs`, `--lambda-dur`, `--freeze-encoder`, `--results-json`, etc.
 
-The script saves the **best validation switch macro-F1** checkpoint to `--checkpoint` and writes history + per-pair metrics to `--results`.
+The script saves the **best validation switch macro-F1** checkpoint to `--checkpoint` and writes history + per-pair metrics to `--results` (pickle). With **`--results-json`**, the **same** payload is also written as UTF-8 JSON (numpy scalars normalized for submission / diffing).
 
 ### Step C — Evaluate a saved checkpoint (optional)
 
@@ -98,8 +99,11 @@ The script saves the **best validation switch macro-F1** checkpoint to `--checkp
 python scripts/evaluate.py \
   --checkpoint checkpoints/best_xlmr.pt \
   --data data/preprocessed.pkl \
-  --output results/eval_results.pkl
+  --output results/eval_results.pkl \
+  --results-json results/eval_results.json
 ```
+
+You can use **`--results-json` alone** (no `--output`) if you only need JSON.
 
 ### Step D — Plots (optional)
 
@@ -130,7 +134,7 @@ python scripts/visualize.py --results results/train_results.pkl --output-dir fig
 
 | Path | Role |
 |------|------|
-| `codeswitch/` | Library: config, data, model, trainer, evaluate, LID, visualize |
+| `codeswitch/` | Library: config, data, model, trainer, evaluate, LID, visualize, `results_json` |
 | `scripts/preprocess.py` | Build `data/*.pkl` |
 | `scripts/train.py` | Training loop |
 | `scripts/evaluate.py` | Load checkpoint, per-pair metrics |
