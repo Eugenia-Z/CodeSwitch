@@ -1,4 +1,17 @@
-torch>=2.0.0
+# PyTorch is installed separately so GPU clusters can match the driver CUDA.
+#
+# Linux + NVIDIA GPU (recommended on clusters; CUDA 12.x drivers, e.g. 12.0–12.8):
+#   pip install torch --index-url https://download.pytorch.org/whl/cu124
+#
+# macOS / CPU-only / default PyPI wheel:
+#   pip install "torch>=2.2.0,<2.8.0"
+#
+# Then always:
+#   pip install -r requirements.txt
+#
+# Optional one-liner after torch is installed:
+#   pip install -r requirements.txt
+
 transformers>=4.35.0
 sentencepiece>=0.1.99
 datasets>=2.14.0
