@@ -21,6 +21,9 @@ Usage
 
     # Also write metrics JSON (same payload as the pickle)
     python scripts/train.py --results-json results/train_results.json
+
+    # Validation / final eval use causal prefix decoding (train stays bidirectional)
+    python scripts/train.py --causal-at-eval
 """
 from __future__ import annotations
 import argparse
@@ -82,6 +85,9 @@ def parse_args() -> argparse.Namespace:
                    help="Path to save final results + history")
     p.add_argument("--results-json", default=None, metavar="PATH",
                    help="Also save the same metrics payload as JSON (optional)")
+    p.add_argument("--causal-at-eval", action="store_true",
+                   help="Train with full bidirectional context; val/final eval use "
+                        "causal prefix (position t sees only tokens 0..t)")
     return p.parse_args()
 
 
@@ -102,6 +108,7 @@ def main() -> None:
         max_len=args.max_len,
         dropout=args.dropout,
         freeze_encoder=args.freeze_encoder,
+        use_causal_at_eval=args.causal_at_eval,
     )
 
     train_pairs    = [parse_pair(p) for p in args.train_pairs]    if args.train_pairs    else TRAIN_PAIRS
@@ -150,6 +157,7 @@ def main() -> None:
         model_name=model_config.model_name,
         dropout=model_config.dropout,
         freeze_encoder=model_config.freeze_encoder,
+        use_causal_at_eval=model_config.use_causal_at_eval,
     ).to(device)
 
     optimizer = torch.optim.AdamW(
@@ -165,6 +173,8 @@ def main() -> None:
     )
 
     print(f"\n  Mode:        {'FROZEN encoder' if model_config.freeze_encoder else 'FULL FINE-TUNING (bidirectional)'}")
+    if model_config.use_causal_at_eval:
+        print("  Val/final:   causal prefix decoding (per-position encoder on prefix 0..t)")
     print(f"  Encoder LR:  {train_config.base_lr}  |  Head LR: {train_config.head_lr}")
     print(f"  Train pairs: {len(train_pairs)}  |  Zero-shot: {len(zeroshot_pairs)}")
     print(f"  Batches:     {len(train_loader)} train  /  {len(val_loader)} val")
@@ -226,16 +236,22 @@ def main() -> None:
     final_zs    = evaluate_per_pair(model, all_stats, zeroshot_pairs, tokenizer, device, **eval_kwargs) \
                   if zeroshot_pairs else {}
 
-    print_sigma_summary(final_train, final_zs)
+    _headline = (
+        "FINAL RESULTS: XLM-R Full FT | eval = causal prefix (train was bidirectional)"
+        if model_config.use_causal_at_eval
+        else None
+    )
+    print_sigma_summary(final_train, final_zs, headline=_headline)
 
     # Persist results
     results_path = Path(args.results)
     results_path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
-        "history":          history,
-        "train_results":    final_train,
-        "zeroshot_results": final_zs,
-        "best_switch_f1":   best_sw_f1,
+        "history":             history,
+        "train_results":       final_train,
+        "zeroshot_results":    final_zs,
+        "best_switch_f1":      best_sw_f1,
+        "use_causal_at_eval":  model_config.use_causal_at_eval,
     }
     with open(results_path, "wb") as f:
         pickle.dump(payload, f)

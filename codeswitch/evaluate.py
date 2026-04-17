@@ -100,10 +100,13 @@ def evaluate_per_pair(
 def print_sigma_summary(
     train_results:    dict[str, dict],
     zeroshot_results: dict[str, dict],
+    *,
+    headline: str | None = None,
 ) -> None:
     """Print σ_universality table to stdout."""
+    title = headline or "FINAL RESULTS: XLM-R Full FT + Bidirectional"
     print(f"\n{'='*75}")
-    print("FINAL RESULTS: XLM-R Full FT + Bidirectional")
+    print(title)
     print(f"{'='*75}")
 
     def _section(title: str, results: dict[str, dict]) -> tuple[list, list]:
