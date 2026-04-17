@@ -89,9 +89,11 @@ python scripts/train.py \
   --results-json results/train_results.json
 ```
 
-Useful flags (see `python scripts/train.py --help`): `--epochs`, `--batch-size`, `--train-pairs`, `--zeroshot-pairs`, `--lambda-dur`, `--freeze-encoder`, `--results-json`, etc.
+Useful flags (see `python scripts/train.py --help`): `--epochs`, `--batch-size`, `--train-pairs`, `--zeroshot-pairs`, `--lambda-dur`, `--freeze-encoder`, `--results-json`, `--causal-at-eval`, etc.
 
 The script saves the **best validation switch macro-F1** checkpoint to `--checkpoint` and writes history + per-pair metrics to `--results` (pickle). With **`--results-json`**, the **same** payload is also written as UTF-8 JSON (numpy scalars normalized for submission / diffing).
+
+**`--causal-at-eval`:** training still uses one **bidirectional** full-sequence encoder pass per batch. **Validation and final per-pair evaluation** use **causal prefix decoding**: for each position `t`, the representation is taken from an encoder run on tokens `0..t` only, so when predicting token `t+1` the model cannot attend to future tokens. This is slower at eval (roughly `seq_len` encoder passes per batch). The saved pickle/JSON includes `"use_causal_at_eval": true` when enabled.
 
 ### Step C — Evaluate a saved checkpoint (optional)
 
@@ -103,7 +105,7 @@ python scripts/evaluate.py \
   --results-json results/eval_results.json
 ```
 
-You can use **`--results-json` alone** (no `--output`) if you only need JSON.
+You can use **`--results-json` alone** (no `--output`) if you only need JSON. Add **`--causal-at-eval`** to match causal-prefix inference (same flag as in training).
 
 ### Step D — Plots (optional)
 
@@ -126,7 +128,14 @@ python scripts/visualize.py --results results/train_results.pkl --output-dir fig
    python scripts/train.py --data "$PWD/data/preprocessed.pkl"
    ```
 
-4. If `torch` was built for a **newer** CUDA than the job node’s driver, reinstall PyTorch for a lower CUDA wheel (e.g. `cu124`) as in the setup section.
+4. Example SLURM script (tagged output dirs under `results/` and `checkpoints/`): `jobs/train_causal_eval_discovery.sbatch`. Submit from the repo root after editing `#SBATCH` partition/account and Conda paths:
+
+   ```bash
+   mkdir -p logs
+   EXP_NAME=my_run sbatch jobs/train_causal_eval_discovery.sbatch
+   ```
+
+5. If `torch` was built for a **newer** CUDA than the job node’s driver, reinstall PyTorch for a lower CUDA wheel (e.g. `cu124`) as in the setup section.
 
 ---
 
@@ -139,6 +148,7 @@ python scripts/visualize.py --results results/train_results.pkl --output-dir fig
 | `scripts/train.py` | Training loop |
 | `scripts/evaluate.py` | Load checkpoint, per-pair metrics |
 | `scripts/visualize.py` | Figures from result pickles |
+| `jobs/*.sbatch` | Example SLURM jobs (Discovery-style) |
 | `environment.yml` | Conda env `cs` (no PyTorch) |
 | `requirements.txt` | Pip deps only (no PyTorch); comments document torch install |
 

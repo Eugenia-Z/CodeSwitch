@@ -67,6 +67,8 @@ def parse_args() -> argparse.Namespace:
                    help="Save results dict to this pickle path (optional)")
     p.add_argument("--results-json", default=None, metavar="PATH",
                    help="Save the same metrics as JSON (optional; can be used without --output)")
+    p.add_argument("--causal-at-eval", action="store_true",
+                   help="Use causal prefix decoding (must match how you want to run inference)")
     return p.parse_args()
 
 
@@ -87,7 +89,9 @@ def main() -> None:
     tokenizer = XLMRobertaTokenizer.from_pretrained(args.model)
 
     model = XLMRCodeSwitchPredictor(
-        model_name=args.model, dropout=args.dropout
+        model_name=args.model,
+        dropout=args.dropout,
+        use_causal_at_eval=args.causal_at_eval,
     ).to(device)
     print(f"\nLoading checkpoint: {args.checkpoint}")
     model.load_state_dict(torch.load(args.checkpoint, map_location=device))
@@ -102,9 +106,18 @@ def main() -> None:
     zs_results    = evaluate_per_pair(model, all_stats, zeroshot_pairs, tokenizer, device, **eval_kwargs) \
                     if zeroshot_pairs else {}
 
-    print_sigma_summary(train_results, zs_results)
+    _headline = (
+        "FINAL RESULTS: XLM-R | eval = causal prefix decoding"
+        if args.causal_at_eval
+        else None
+    )
+    print_sigma_summary(train_results, zs_results, headline=_headline)
 
-    payload = {"train_results": train_results, "zeroshot_results": zs_results}
+    payload = {
+        "train_results":      train_results,
+        "zeroshot_results":   zs_results,
+        "use_causal_at_eval": args.causal_at_eval,
+    }
 
     if args.output:
         out = Path(args.output)
