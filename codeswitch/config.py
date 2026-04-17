@@ -63,9 +63,6 @@ class ModelConfig:
     dropout:        float = 0.1
     freeze_encoder: bool  = False
     max_len:        int   = 128
-    # When True: training stays full-sequence bidirectional; in eval() only, use
-    # prefix encodes so hidden[t] never attends to tokens > t (causal for t→t+1).
-    use_causal_at_eval: bool = False
 
 
 @dataclass
