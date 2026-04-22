@@ -1,0 +1,34 @@
+{
+  "model": "bert-base-multilingual-cased",
+  "mode": "causal_full_fine_tuning",
+  "train_pairs": [
+    "Chinese-English",
+    "Hindi-English",
+    "Italian-English",
+    "German-English",
+    "Arabic-English",
+    "Japanese-English",
+    "Vietnamese-English",
+    "Spanish-English"
+  ],
+  "zeroshot_pairs": [
+    "Korean-English",
+    "Russian-English",
+    "French-English",
+    "Malay-English",
+    "Philippines-English",
+    "German-French",
+    "Cantonese-English"
+  ],
+  "hyperparams": {
+    "MAX_LEN": 256,
+    "BATCH_SIZE": 32,
+    "NUM_EPOCHS": 16,
+    "BASE_LR": 1e-05,
+    "HEAD_LR": 0.0005,
+    "WARMUP_RATIO": 0.1
+  },
+  "final_switch_f1": 0.7759746191573953,
+  "final_duration_f1": 0.5847607762349842,
+  "n_epochs_run": 16
+}

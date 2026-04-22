@@ -1,0 +1,16 @@
+{
+  "model": "xlm-roberta-base",
+  "mode": "causal_full_fine_tuning_demo_backbone",
+  "trained_on": "all_15_pairs (80/20 within-pair split)",
+  "hyperparams": {
+    "MAX_LEN": 256,
+    "BATCH_SIZE": 32,
+    "NUM_EPOCHS": 4,
+    "BASE_LR": 1e-05,
+    "HEAD_LR": 0.0005,
+    "WARMUP_RATIO": 0.1
+  },
+  "final_switch_f1": 0.7658253423748111,
+  "final_duration_f1": 0.5770747784497602,
+  "n_epochs_run": 4
+}

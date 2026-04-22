@@ -1,0 +1,338 @@
+[
+  {
+    "epoch": 1,
+    "loss_sw": 0.45615032841761904,
+    "loss_dur": 0.9795947243273259,
+    "val_loss_sw": 0.3596249269445737,
+    "val_loss_dur": 0.8750752262274424,
+    "switch_f1": 0.7054262832492821,
+    "duration_f1": 0.5456882235444293,
+    "pair_f1s": {
+      "Chinese-English": 0.7167376117481954,
+      "Hindi-English": 0.7267300106428516,
+      "Italian-English": 0.7275175203483428,
+      "German-English": 0.6497203182435386,
+      "Arabic-English": 0.6993969608484929,
+      "Japanese-English": 0.7121604955572789,
+      "Vietnamese-English": 0.6735550967965734,
+      "Spanish-English": 0.5977504728780939
+    },
+    "encoder_lr": 6.25e-06,
+    "elapsed_h": 0.33164251539442274
+  },
+  {
+    "epoch": 2,
+    "loss_sw": 0.34466410636901856,
+    "loss_dur": 0.8814770211776097,
+    "val_loss_sw": 0.3268511191507181,
+    "val_loss_dur": 0.8293211438258489,
+    "switch_f1": 0.7127206475132805,
+    "duration_f1": 0.57115871917745,
+    "pair_f1s": {
+      "Chinese-English": 0.7298933542789431,
+      "Hindi-English": 0.7584436726272524,
+      "Italian-English": 0.7440714435120452,
+      "German-English": 0.6444986464375895,
+      "Arabic-English": 0.6926245677143352,
+      "Japanese-English": 0.736740959008924,
+      "Vietnamese-English": 0.6708813997817167,
+      "Spanish-English": 0.5947836907047983
+    },
+    "encoder_lr": 9.980973490458728e-06,
+    "elapsed_h": 0.663288919462098
+  },
+  {
+    "epoch": 3,
+    "loss_sw": 0.3161707072208325,
+    "loss_dur": 0.8452734247346719,
+    "val_loss_sw": 0.30550976226727167,
+    "val_loss_dur": 0.8124703770875931,
+    "switch_f1": 0.7512379618527962,
+    "duration_f1": 0.5840275391196712,
+    "pair_f1s": {
+      "Chinese-English": 0.7583729414162941,
+      "Hindi-English": 0.7806623133830146,
+      "Italian-English": 0.7734081627826032,
+      "German-English": 0.7178625608512104,
+      "Arabic-English": 0.7321554999088118,
+      "Japanese-English": 0.7634569666067939,
+      "Vietnamese-English": 0.7208988680160119,
+      "Spanish-English": 0.6467748303814584
+    },
+    "encoder_lr": 9.768584753741134e-06,
+    "elapsed_h": 0.995742043322987
+  },
+  {
+    "epoch": 4,
+    "loss_sw": 0.30177826053152484,
+    "loss_dur": 0.8209697093069553,
+    "val_loss_sw": 0.29724168702960013,
+    "val_loss_dur": 0.8051086350282033,
+    "switch_f1": 0.7681929238002361,
+    "duration_f1": 0.5834017946542573,
+    "pair_f1s": {
+      "Chinese-English": 0.769326662356965,
+      "Hindi-English": 0.7971261173969251,
+      "Italian-English": 0.7816429689538733,
+      "German-English": 0.7359281907520494,
+      "Arabic-English": 0.747761632916857,
+      "Japanese-English": 0.7794694849209926,
+      "Vietnamese-English": 0.7462893781842872,
+      "Spanish-English": 0.6761026757568934
+    },
+    "encoder_lr": 9.330127018922195e-06,
+    "elapsed_h": 1.3283197416861852
+  },
+  {
+    "epoch": 5,
+    "loss_sw": 0.2921898640195529,
+    "loss_dur": 0.7998882658779621,
+    "val_loss_sw": 0.2940541370213032,
+    "val_loss_dur": 0.8007419806718826,
+    "switch_f1": 0.7642755416808793,
+    "duration_f1": 0.582075351775378,
+    "pair_f1s": {
+      "Chinese-English": 0.7706757745371788,
+      "Hindi-English": 0.793771949578298,
+      "Italian-English": 0.7833897306455487,
+      "German-English": 0.7304543732398054,
+      "Arabic-English": 0.7425232600206922,
+      "Japanese-English": 0.7760679970925186,
+      "Vietnamese-English": 0.7447337236938595,
+      "Spanish-English": 0.6624189154087012
+    },
+    "encoder_lr": 8.68638668405062e-06,
+    "elapsed_h": 1.6604994079801771
+  },
+  {
+    "epoch": 6,
+    "loss_sw": 0.28509533068786064,
+    "loss_dur": 0.780542215257883,
+    "val_loss_sw": 0.2925221120317777,
+    "val_loss_dur": 0.8094958285490672,
+    "switch_f1": 0.766120456742644,
+    "duration_f1": 0.5902380009332615,
+    "pair_f1s": {
+      "Chinese-English": 0.7678761300251249,
+      "Hindi-English": 0.8019948891150355,
+      "Italian-English": 0.7814838012898926,
+      "German-English": 0.7305565354820323,
+      "Arabic-English": 0.7485111064107723,
+      "Japanese-English": 0.7785798682435254,
+      "Vietnamese-English": 0.7543794017124499,
+      "Spanish-English": 0.657854570899828
+    },
+    "encoder_lr": 7.86788218175523e-06,
+    "elapsed_h": 1.993168352511194
+  },
+  {
+    "epoch": 7,
+    "loss_sw": 0.27965496327728034,
+    "loss_dur": 0.7604928899308045,
+    "val_loss_sw": 0.29252298568685847,
+    "val_loss_dur": 0.823943194548289,
+    "switch_f1": 0.7699934397945079,
+    "duration_f1": 0.590733633179334,
+    "pair_f1s": {
+      "Chinese-English": 0.7719990647288868,
+      "Hindi-English": 0.8046866128827964,
+      "Italian-English": 0.7825132718240372,
+      "German-English": 0.7374447545835763,
+      "Arabic-English": 0.7558966844971529,
+      "Japanese-English": 0.7823455058354707,
+      "Vietnamese-English": 0.7541263795425407,
+      "Spanish-English": 0.6647670920389599
+    },
+    "encoder_lr": 6.913417161825449e-06,
+    "elapsed_h": 2.3253522619273927
+  },
+  {
+    "epoch": 8,
+    "loss_sw": 0.2749550862982869,
+    "loss_dur": 0.7416147733231385,
+    "val_loss_sw": 0.2925799153248469,
+    "val_loss_dur": 0.8268472121159236,
+    "switch_f1": 0.7761917595471305,
+    "duration_f1": 0.5846187843575622,
+    "pair_f1s": {
+      "Chinese-English": 0.7735092153926736,
+      "Hindi-English": 0.8052689324073796,
+      "Italian-English": 0.7940763595366063,
+      "German-English": 0.7490418057335274,
+      "Arabic-English": 0.7569677455979329,
+      "Japanese-English": 0.7858995540486857,
+      "Vietnamese-English": 0.7595638145048023,
+      "Spanish-English": 0.6791024564288217
+    },
+    "encoder_lr": 5.8682408883346535e-06,
+    "elapsed_h": 2.6577448133627573
+  },
+  {
+    "epoch": 9,
+    "loss_sw": 0.2715069549282392,
+    "loss_dur": 0.7231884609162808,
+    "val_loss_sw": 0.2903819011648496,
+    "val_loss_dur": 0.8362882423400879,
+    "switch_f1": 0.7761468854887774,
+    "duration_f1": 0.5850567967314176,
+    "pair_f1s": {
+      "Chinese-English": 0.7751520950456261,
+      "Hindi-English": 0.8050465944847054,
+      "Italian-English": 0.7947196540982904,
+      "German-English": 0.7498022159207159,
+      "Arabic-English": 0.7542727460547884,
+      "Japanese-English": 0.7899770043931634,
+      "Vietnamese-English": 0.75682509898028,
+      "Spanish-English": 0.6780912277244463
+    },
+    "encoder_lr": 4.781903063173321e-06,
+    "elapsed_h": 2.9897375031974582
+  },
+  {
+    "epoch": 10,
+    "loss_sw": 0.26857859862347444,
+    "loss_dur": 0.705385531137387,
+    "val_loss_sw": 0.29039403061072033,
+    "val_loss_dur": 0.8554177012046178,
+    "switch_f1": 0.7739320350465395,
+    "duration_f1": 0.5844975472359851,
+    "pair_f1s": {
+      "Chinese-English": 0.7744917176549369,
+      "Hindi-English": 0.8034793037765171,
+      "Italian-English": 0.7903139177350895,
+      "German-English": 0.7482258470067826,
+      "Arabic-English": 0.7507559948831468,
+      "Japanese-English": 0.7881153593029352,
+      "Vietnamese-English": 0.7534491917569255,
+      "Spanish-English": 0.6763496437630445
+    },
+    "encoder_lr": 3.705904774487396e-06,
+    "elapsed_h": 3.3215354777706994
+  },
+  {
+    "epoch": 11,
+    "loss_sw": 0.2659377702822288,
+    "loss_dur": 0.6899342149496078,
+    "val_loss_sw": 0.29211707080403965,
+    "val_loss_dur": 0.8829671456416448,
+    "switch_f1": 0.7751853804949694,
+    "duration_f1": 0.5869622379760447,
+    "pair_f1s": {
+      "Chinese-English": 0.7760525034523142,
+      "Hindi-English": 0.8068301558187471,
+      "Italian-English": 0.7893382545530763,
+      "German-English": 0.748407648368375,
+      "Arabic-English": 0.7574564457851768,
+      "Japanese-English": 0.7881060861585106,
+      "Vietnamese-English": 0.7559744383753308,
+      "Spanish-English": 0.6744926130397455
+    },
+    "encoder_lr": 2.6912569338248317e-06,
+    "elapsed_h": 3.6541915011405943
+  },
+  {
+    "epoch": 12,
+    "loss_sw": 0.26422657184302806,
+    "loss_dur": 0.6770359094440938,
+    "val_loss_sw": 0.2929333644111951,
+    "val_loss_dur": 0.9016705445448557,
+    "switch_f1": 0.7776076400072127,
+    "duration_f1": 0.5852717882382691,
+    "pair_f1s": {
+      "Chinese-English": 0.7757029816465044,
+      "Hindi-English": 0.8080554941403871,
+      "Italian-English": 0.7940884958633561,
+      "German-English": 0.7520930816975033,
+      "Arabic-English": 0.7598994856276858,
+      "Japanese-English": 0.7881322206933719,
+      "Vietnamese-English": 0.7575826648332016,
+      "Spanish-English": 0.6803630506780292
+    },
+    "encoder_lr": 1.7860619515673034e-06,
+    "elapsed_h": 3.986375648048189
+  },
+  {
+    "epoch": 13,
+    "loss_sw": 0.2627926073223352,
+    "loss_dur": 0.6671959673364957,
+    "val_loss_sw": 0.29222094361980755,
+    "val_loss_dur": 0.9039947323004405,
+    "switch_f1": 0.7754921498840772,
+    "duration_f1": 0.5844486714387664,
+    "pair_f1s": {
+      "Chinese-English": 0.7754306570738353,
+      "Hindi-English": 0.8070253685406344,
+      "Italian-English": 0.7928074754658228,
+      "German-English": 0.7473018511758093,
+      "Arabic-English": 0.7572287161258264,
+      "Japanese-English": 0.7875781014142847,
+      "Vietnamese-English": 0.7548474344739888,
+      "Spanish-English": 0.676564212817191
+    },
+    "encoder_lr": 1.0332332985438248e-06,
+    "elapsed_h": 4.321362449328105
+  },
+  {
+    "epoch": 14,
+    "loss_sw": 0.2618750472490986,
+    "loss_dur": 0.6599452228844166,
+    "val_loss_sw": 0.293081868737936,
+    "val_loss_dur": 0.9171348236004512,
+    "switch_f1": 0.7756795405787948,
+    "duration_f1": 0.5852046987169833,
+    "pair_f1s": {
+      "Chinese-English": 0.7750361989357339,
+      "Hindi-English": 0.8067764086121783,
+      "Italian-English": 0.792884363680576,
+      "German-English": 0.7482768242385296,
+      "Arabic-English": 0.756790340523849,
+      "Japanese-English": 0.7876267316263735,
+      "Vietnamese-English": 0.7544277487280395,
+      "Spanish-English": 0.6781486855629626
+    },
+    "encoder_lr": 4.6846106481675035e-07,
+    "elapsed_h": 4.653403497007158
+  },
+  {
+    "epoch": 15,
+    "loss_sw": 0.2610994927336772,
+    "loss_dur": 0.656386765440305,
+    "val_loss_sw": 0.2931230999032656,
+    "val_loss_dur": 0.9166230913003286,
+    "switch_f1": 0.7757654172403488,
+    "duration_f1": 0.5843435066484995,
+    "pair_f1s": {
+      "Chinese-English": 0.7746673782680396,
+      "Hindi-English": 0.8069780191262148,
+      "Italian-English": 0.7932503672405865,
+      "German-English": 0.7487051052713783,
+      "Arabic-English": 0.7575694843292778,
+      "Japanese-English": 0.7871463439645023,
+      "Vietnamese-English": 0.755336033314705,
+      "Spanish-English": 0.6770676791079966
+    },
+    "encoder_lr": 1.185199644003332e-07,
+    "elapsed_h": 4.985472413102785
+  },
+  {
+    "epoch": 16,
+    "loss_sw": 0.26068066962063313,
+    "loss_dur": 0.6550668387115002,
+    "val_loss_sw": 0.29303388232986133,
+    "val_loss_dur": 0.9199291104078293,
+    "switch_f1": 0.7759746191573953,
+    "duration_f1": 0.5847607762349842,
+    "pair_f1s": {
+      "Chinese-English": 0.7746786258792379,
+      "Hindi-English": 0.8071561484296403,
+      "Italian-English": 0.7932358217048634,
+      "German-English": 0.748589248001081,
+      "Arabic-English": 0.7578516703549711,
+      "Japanese-English": 0.787009073238534,
+      "Vietnamese-English": 0.7558406330115539,
+      "Spanish-English": 0.6778192439583208
+    },
+    "encoder_lr": 0.0,
+    "elapsed_h": 5.317289490832223
+  }
+]
