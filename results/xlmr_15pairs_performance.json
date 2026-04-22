@@ -1,0 +1,77 @@
+{
+  "model": "XLM-R Causal Full FT",
+  "config": {
+    "epochs": 16,
+    "lr": 1e-05,
+    "causal_mask": true,
+    "num_pairs": 15
+  },
+  "per_pair": {
+    "Chinese-English": {
+      "switch_f1": 0.8085,
+      "duration_f1": 0.6223
+    },
+    "Hindi-English": {
+      "switch_f1": 0.7388,
+      "duration_f1": 0.5338
+    },
+    "Italian-English": {
+      "switch_f1": 0.8122,
+      "duration_f1": 0.5187
+    },
+    "German-English": {
+      "switch_f1": 0.7759,
+      "duration_f1": 0.5476
+    },
+    "Arabic-English": {
+      "switch_f1": 0.7834,
+      "duration_f1": 0.595
+    },
+    "Japanese-English": {
+      "switch_f1": 0.8231,
+      "duration_f1": 0.6358
+    },
+    "Vietnamese-English": {
+      "switch_f1": 0.7768,
+      "duration_f1": 0.577
+    },
+    "Spanish-English": {
+      "switch_f1": 0.767,
+      "duration_f1": 0.5237
+    },
+    "Korean-English": {
+      "switch_f1": 0.8306,
+      "duration_f1": 0.6172
+    },
+    "Russian-English": {
+      "switch_f1": 0.788,
+      "duration_f1": 0.6012
+    },
+    "French-English": {
+      "switch_f1": 0.7775,
+      "duration_f1": 0.5122
+    },
+    "Malay-English": {
+      "switch_f1": 0.7316,
+      "duration_f1": 0.4982
+    },
+    "Philippines-English": {
+      "switch_f1": 0.738,
+      "duration_f1": 0.4729
+    },
+    "German-French": {
+      "switch_f1": 0.7801,
+      "duration_f1": 0.5343
+    },
+    "Cantonese-English": {
+      "switch_f1": 0.7763,
+      "duration_f1": 0.6324
+    }
+  },
+  "summary": {
+    "switch_f1_mean": 0.7805,
+    "switch_f1_std": 0.0287,
+    "duration_f1_mean": 0.5615,
+    "duration_f1_std": 0.0513
+  }
+}

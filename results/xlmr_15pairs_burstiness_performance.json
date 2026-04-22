@@ -1,0 +1,139 @@
+{
+  "experiment": "Burstiness Analysis \u2014 Multitask vs Single-Task",
+  "model": "XLM-R Causal Full FT",
+  "multitask_lambda": 1.0,
+  "singletask_lambda": 0.0,
+  "per_pair": {
+    "Chinese-English": {
+      "mt_bursty": 0.3662,
+      "st_bursty": 0.3714,
+      "delta_bursty": -0.0052,
+      "mt_isolated": 0.1877,
+      "st_isolated": 0.1814,
+      "delta_isolated": 0.0063
+    },
+    "Hindi-English": {
+      "mt_bursty": 0.6191,
+      "st_bursty": 0.6018,
+      "delta_bursty": 0.0173,
+      "mt_isolated": 0.3611,
+      "st_isolated": 0.3492,
+      "delta_isolated": 0.0119
+    },
+    "Italian-English": {
+      "mt_bursty": 0.6243,
+      "st_bursty": 0.6078,
+      "delta_bursty": 0.0165,
+      "mt_isolated": 0.3029,
+      "st_isolated": 0.2901,
+      "delta_isolated": 0.0128
+    },
+    "German-English": {
+      "mt_bursty": 0.4033,
+      "st_bursty": 0.4034,
+      "delta_bursty": -0.0001,
+      "mt_isolated": 0.2654,
+      "st_isolated": 0.2557,
+      "delta_isolated": 0.0097
+    },
+    "Arabic-English": {
+      "mt_bursty": 0.3388,
+      "st_bursty": 0.3315,
+      "delta_bursty": 0.0072,
+      "mt_isolated": 0.1744,
+      "st_isolated": 0.1707,
+      "delta_isolated": 0.0037
+    },
+    "Japanese-English": {
+      "mt_bursty": 0.3469,
+      "st_bursty": 0.344,
+      "delta_bursty": 0.0029,
+      "mt_isolated": 0.1929,
+      "st_isolated": 0.1848,
+      "delta_isolated": 0.0082
+    },
+    "Vietnamese-English": {
+      "mt_bursty": 0.3973,
+      "st_bursty": 0.3911,
+      "delta_bursty": 0.0061,
+      "mt_isolated": 0.2345,
+      "st_isolated": 0.2227,
+      "delta_isolated": 0.0117
+    },
+    "Spanish-English": {
+      "mt_bursty": 0.5183,
+      "st_bursty": 0.5075,
+      "delta_bursty": 0.0109,
+      "mt_isolated": 0.3181,
+      "st_isolated": 0.3033,
+      "delta_isolated": 0.0148
+    },
+    "Korean-English": {
+      "mt_bursty": 0.3438,
+      "st_bursty": 0.3495,
+      "delta_bursty": -0.0058,
+      "mt_isolated": 0.1144,
+      "st_isolated": 0.1136,
+      "delta_isolated": 0.0008
+    },
+    "Russian-English": {
+      "mt_bursty": 0.3662,
+      "st_bursty": 0.367,
+      "delta_bursty": -0.0008,
+      "mt_isolated": 0.1446,
+      "st_isolated": 0.1437,
+      "delta_isolated": 0.0009
+    },
+    "French-English": {
+      "mt_bursty": 0.6486,
+      "st_bursty": 0.6333,
+      "delta_bursty": 0.0153,
+      "mt_isolated": 0.3721,
+      "st_isolated": 0.3546,
+      "delta_isolated": 0.0175
+    },
+    "Malay-English": {
+      "mt_bursty": 0.698,
+      "st_bursty": 0.673,
+      "delta_bursty": 0.025,
+      "mt_isolated": 0.4586,
+      "st_isolated": 0.427,
+      "delta_isolated": 0.0316
+    },
+    "Philippines-English": {
+      "mt_bursty": 0.6393,
+      "st_bursty": 0.6167,
+      "delta_bursty": 0.0226,
+      "mt_isolated": 0.4129,
+      "st_isolated": 0.385,
+      "delta_isolated": 0.0279
+    },
+    "German-French": {
+      "mt_bursty": 0.6183,
+      "st_bursty": 0.6133,
+      "delta_bursty": 0.0049,
+      "mt_isolated": 0.2897,
+      "st_isolated": 0.2873,
+      "delta_isolated": 0.0025
+    },
+    "Cantonese-English": {
+      "mt_bursty": 0.385,
+      "st_bursty": 0.3783,
+      "delta_bursty": 0.0068,
+      "mt_isolated": 0.193,
+      "st_isolated": 0.1928,
+      "delta_isolated": 0.0002
+    }
+  },
+  "summary": {
+    "avg_delta_bursty": 0.0082,
+    "avg_delta_isolated": 0.0107,
+    "multitask_switch_f1": 0.7805,
+    "multitask_duration_f1": 0.5615,
+    "singletask_switch_f1": 0.7867,
+    "singletask_duration_f1": 0.226,
+    "delta_switch_f1": -0.0062,
+    "delta_duration_f1": 0.3355
+  },
+  "finding": "Duration head does not specifically target bursty regions. Multitask gain is uniform across bursty and isolated regions."
+}
