@@ -2,10 +2,18 @@
 """
 Preprocess SwitchLingua dataset: run LID + label generation, save pickle.
 
+The output pickle stores word-level LID tags alongside the subword tokens so
+the same file can be loaded with any backbone tokenizer.  If you intend to
+train with a different backbone (e.g. xglm vs xlmr), you only need to run
+preprocessing once; the DataLoader re-tokenises on-the-fly.
+
 Usage
 -----
-    # Process all 15 language pairs (default)
+    # Process all 15 language pairs (default backbone: xlmr)
     python scripts/preprocess.py
+
+    # Use XGLM tokenizer during preprocessing (affects stored 'tokens' field)
+    python scripts/preprocess.py --backbone xglm
 
     # Custom output / sample count
     python scripts/preprocess.py --output data/small.pkl --max-samples 1000
@@ -24,11 +32,12 @@ from pathlib import Path
 
 import torch
 
-# Allow running from repo root without installing the package
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from codeswitch.auth import hf_login
-from codeswitch.config import ALL_LANGUAGE_PAIRS, DataConfig, ModelConfig, parse_pair
+from codeswitch.config import (
+    ALL_LANGUAGE_PAIRS, BACKBONE_MODEL_DEFAULTS, DataConfig, ModelConfig, parse_pair,
+)
 from codeswitch.data import analyze_language_pair
 from codeswitch.lid import ProductionLID
 from transformers import AutoTokenizer
@@ -50,8 +59,11 @@ def parse_args() -> argparse.Namespace:
                    help="Language pairs to process (default: all 15)")
     p.add_argument("--dataset",     default=cfg_data.dataset_name,
                    help="HuggingFace dataset name")
-    p.add_argument("--model",       default=cfg_model.model_name,
-                   help="Tokenizer model name")
+    p.add_argument("--backbone",    default=cfg_model.backbone,
+                   choices=list(BACKBONE_MODEL_DEFAULTS.keys()),
+                   help="Backbone tokenizer to use for subword alignment")
+    p.add_argument("--model",       default=None,
+                   help="HF model ID for tokenizer (overrides backbone default)")
     p.add_argument("--lid-model",   default=cfg_model.lid_model,
                    help="LID pipeline model name")
     p.add_argument("--hf-token",    default=None,
@@ -74,8 +86,9 @@ def main() -> None:
     for lang1, lang2 in pairs:
         print(f"  {lang1}-{lang2}")
 
-    print(f"\nLoading tokenizer: {args.model}")
-    tokenizer = AutoTokenizer.from_pretrained(args.model)
+    model_name = args.model or BACKBONE_MODEL_DEFAULTS[args.backbone]
+    print(f"\nLoading tokenizer: {model_name}  (backbone: {args.backbone})")
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     device = 0 if torch.cuda.is_available() else -1
     lid    = ProductionLID(model_name=args.lid_model, device=device)

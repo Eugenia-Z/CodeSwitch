@@ -7,7 +7,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from sklearn.metrics import classification_report, f1_score
 
-from .data import XLMRCodeSwitchDataset, make_collate_fn
+from .data import CodeSwitchDataset, make_collate_fn
 
 
 def evaluate(
@@ -85,7 +85,7 @@ def evaluate_per_pair(
             continue
         samples  = all_stats[key]["processed_samples"]
         split_at = int(len(samples) * train_ratio)
-        val_ds   = XLMRCodeSwitchDataset(samples[split_at:], tokenizer, max_len)
+        val_ds   = CodeSwitchDataset(samples[split_at:], tokenizer, max_len)
         if len(val_ds) == 0:
             continue
         ldr = DataLoader(
@@ -103,7 +103,7 @@ def print_sigma_summary(
 ) -> None:
     """Print σ_universality table to stdout."""
     print(f"\n{'='*75}")
-    print("FINAL RESULTS: XLM-R Full FT + Bidirectional")
+    print("FINAL RESULTS")
     print(f"{'='*75}")
 
     def _section(title: str, results: dict[str, dict]) -> tuple[list, list]:

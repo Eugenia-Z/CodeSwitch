@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 
 # ── Language pairs ────────────────────────────────────────────────────────────
 
@@ -54,11 +54,20 @@ def parse_pair(pair_str: str) -> Tuple[str, str]:
     return parts[0].strip(), parts[1].strip()
 
 
+# ── Backbone registry ─────────────────────────────────────────────────────────
+
+BACKBONE_MODEL_DEFAULTS: Dict[str, str] = {
+    "xlmr": "xlm-roberta-base",
+    "xglm": "facebook/xglm-564M",
+}
+
+
 # ── Config dataclasses ────────────────────────────────────────────────────────
 
 @dataclass
 class ModelConfig:
-    model_name:     str   = "xlm-roberta-base"
+    backbone:       str   = "xlmr"                # "xlmr" | "xglm"
+    model_name:     str   = "xlm-roberta-base"    # HF model ID; auto-set from backbone if empty
     lid_model:      str   = "papluca/xlm-roberta-base-language-detection"
     dropout:        float = 0.1
     freeze_encoder: bool  = False

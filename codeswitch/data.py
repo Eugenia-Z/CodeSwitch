@@ -30,7 +30,8 @@ def align_subwords_to_words(
         if not word_tokens:
             continue
         for token in word_tokens:
-            clean = token.replace("▁", "").strip()
+            # Both SentencePiece (▁) and BPE (Ġ) word-boundary markers are stripped
+            clean = token.replace("▁", "").replace("Ġ", "").strip()
             tag   = "neutral" if (not clean or is_language_neutral_content(clean)) else lid
             tokens.append(token)
             token_lids.append(tag)
@@ -111,7 +112,13 @@ def process_sample(
     lid_system: ProductionLID,
     tokenizer,
 ) -> Optional[dict]:
-    """Run LID + label generation for a single dataset example."""
+    """Run LID + label generation for a single dataset example.
+
+    The returned dict stores word-level data (backbone-agnostic) alongside
+    subword-level data derived from the given tokenizer.  Downstream code
+    can re-tokenize with a different tokenizer using the stored words/word_lids
+    without re-running the expensive LID step.
+    """
     raw = sample.get("data_generation_result", "")
     if isinstance(raw, list):
         text = " ".join(str(s) for s in raw if s)
@@ -127,6 +134,10 @@ def process_sample(
         y_switch, y_duration     = generate_labels(token_lids)
         return {
             "text":         text,
+            # word-level (backbone-agnostic) — used for re-tokenisation
+            "words":        words,
+            "word_lids":    word_lids,
+            # subword-level (tokenizer-specific) — legacy fallback
             "tokens":       tokens,
             "token_lids":   token_lids,
             "y_switch":     y_switch,
@@ -203,20 +214,45 @@ def analyze_language_pair(
 
 # ── PyTorch Dataset ───────────────────────────────────────────────────────────
 
-class XLMRCodeSwitchDataset(Dataset):
+class CodeSwitchDataset(Dataset):
+    """Tokenizer-agnostic code-switching dataset.
+
+    If the sample dict contains 'words'/'word_lids' (produced by the current
+    preprocess.py), the dataset re-tokenises on-the-fly with the supplied
+    tokenizer so the same pickle works with any backbone.
+
+    Samples that only have 'tokens'/'y_switch'/'y_duration' (legacy pickles
+    created before this refactor) are used as-is; they require the same
+    tokenizer that was used during preprocessing.
+    """
+
     def __init__(self, samples: list[dict], tokenizer, max_len: int = 128) -> None:
         self.items: list[dict] = []
         for s in samples:
-            ids = tokenizer.convert_tokens_to_ids(s["tokens"])
+            if "words" in s and "word_lids" in s:
+                # New format: re-tokenise with the current tokenizer
+                tokens, token_lids = align_subwords_to_words(
+                    s["words"], s["word_lids"], tokenizer
+                )
+                if len(tokens) < 2:
+                    continue
+                y_switch, y_duration = generate_labels(token_lids)
+                ids = tokenizer.convert_tokens_to_ids(tokens)
+            else:
+                # Legacy format: use stored subword tokens directly
+                ids      = tokenizer.convert_tokens_to_ids(s["tokens"])
+                y_switch  = s["y_switch"]
+                y_duration = s["y_duration"]
+
             ids = [tokenizer.bos_token_id] + ids + [tokenizer.eos_token_id]
 
-            sw_raw  = [x if x != -1 else -100 for x in s["y_switch"]]
-            dur_raw = [x if x != -1 else -100 for x in s["y_duration"]]
+            sw_raw  = [x if x != -1 else -100 for x in y_switch]
+            dur_raw = [x if x != -1 else -100 for x in y_duration]
             sw  = [-100] + sw_raw  + [-100]
             dur = [-100] + dur_raw + [-100]
 
-            ids      = ids[:max_len]
-            n        = len(ids)
+            ids = ids[:max_len]
+            n   = len(ids)
             if n < 2:
                 continue
 
@@ -234,6 +270,10 @@ class XLMRCodeSwitchDataset(Dataset):
 
     def __len__(self)        -> int:  return len(self.items)
     def __getitem__(self, i) -> dict: return self.items[i]
+
+
+# Backward-compat alias
+XLMRCodeSwitchDataset = CodeSwitchDataset
 
 
 def make_collate_fn(pad_id: int):
@@ -265,8 +305,8 @@ def build_datasets(
             continue
         samples  = all_stats[key]["processed_samples"]
         split_at = int(len(samples) * train_ratio)
-        tr = XLMRCodeSwitchDataset(samples[:split_at], tokenizer, max_len)
-        va = XLMRCodeSwitchDataset(samples[split_at:],  tokenizer, max_len)
+        tr = CodeSwitchDataset(samples[:split_at], tokenizer, max_len)
+        va = CodeSwitchDataset(samples[split_at:],  tokenizer, max_len)
         print(f"  {key:<25}  total={len(samples):,}  train={len(tr):,}  val={len(va):,}")
         train_sets.append(tr)
         val_sets.append(va)

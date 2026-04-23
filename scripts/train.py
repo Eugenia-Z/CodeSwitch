@@ -1,25 +1,33 @@
 #!/usr/bin/env python3
 """
-Train the XLM-R code-switching predictor.
+Train a code-switching predictor.
+
+Backbone choices
+----------------
+  --backbone xlmr   XLM-RoBERTa with manual causal masking (default)
+  --backbone xglm   XGLM (GPT-style, natively causal)
 
 Usage
 -----
-    # Train with all defaults (15 pairs, 8 epochs)
+    # Train with all defaults (XLM-R, 15 pairs, 8 epochs)
     python scripts/train.py
+
+    # GPT backbone
+    python scripts/train.py --backbone xglm
+
+    # Custom model name (overrides backbone default)
+    python scripts/train.py --backbone xglm --model facebook/xglm-1.7B
 
     # Quick smoke-test
     python scripts/train.py --epochs 2 --batch-size 16 --max-samples 500
 
-    # Custom split
+    # Custom language pair split
     python scripts/train.py \\
         --train-pairs Chinese-English Hindi-English Italian-English \\
         --zeroshot-pairs Korean-English Russian-English \\
         --epochs 5
 
-    # Resume / different checkpoint name
-    python scripts/train.py --checkpoint checkpoints/run2.pt
-
-    # Also write metrics JSON (same payload as the pickle)
+    # Save metrics JSON
     python scripts/train.py --results-json results/train_results.json
 """
 from __future__ import annotations
@@ -35,15 +43,16 @@ import torch.nn as nn
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from codeswitch.config import (
-    TRAIN_PAIRS, ZEROSHOT_PAIRS, DataConfig, ModelConfig, TrainConfig, parse_pair,
+    BACKBONE_MODEL_DEFAULTS, TRAIN_PAIRS, ZEROSHOT_PAIRS,
+    DataConfig, ModelConfig, TrainConfig, parse_pair,
 )
 from codeswitch.data import build_datasets, make_collate_fn
 from codeswitch.evaluate import evaluate, evaluate_per_pair, print_sigma_summary
-from codeswitch.model import XLMRCodeSwitchPredictor
+from codeswitch.model import build_model
 from codeswitch.results_json import save_results_json
 from codeswitch.trainer import compute_class_weights, set_seed, train_epoch
 from torch.utils.data import DataLoader
-from transformers import XLMRobertaTokenizer
+from transformers import AutoTokenizer
 
 
 def parse_args() -> argparse.Namespace:
@@ -52,16 +61,20 @@ def parse_args() -> argparse.Namespace:
     dc = DataConfig()
 
     p = argparse.ArgumentParser(
-        description="Train XLM-R code-switching predictor",
+        description="Train code-switching predictor",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     p.add_argument("--data",           default="data/preprocessed.pkl",
                    help="Preprocessed pickle from scripts/preprocess.py")
+    p.add_argument("--backbone",       default=mc.backbone,
+                   choices=list(BACKBONE_MODEL_DEFAULTS.keys()),
+                   help="Model backbone architecture")
+    p.add_argument("--model",          default=None,
+                   help="HF model ID (overrides backbone default)")
     p.add_argument("--train-pairs",    nargs="+", metavar="LANG1-LANG2",
                    help="Training language pairs (default: config.TRAIN_PAIRS)")
     p.add_argument("--zeroshot-pairs", nargs="+", metavar="LANG1-LANG2",
                    help="Zero-shot pairs (default: config.ZEROSHOT_PAIRS)")
-    p.add_argument("--model",          default=mc.model_name)
     p.add_argument("--epochs",         type=int,   default=tc.num_epochs)
     p.add_argument("--batch-size",     type=int,   default=tc.batch_size)
     p.add_argument("--base-lr",        type=float, default=tc.base_lr)
@@ -72,21 +85,23 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--max-len",        type=int,   default=mc.max_len)
     p.add_argument("--dropout",        type=float, default=mc.dropout)
     p.add_argument("--freeze-encoder", action="store_true",
-                   help="Freeze XLM-R encoder, train only heads")
+                   help="Freeze encoder weights, train only heads")
     p.add_argument("--train-ratio",    type=float, default=dc.train_ratio)
     p.add_argument("--seed",           type=int,   default=tc.seed)
     p.add_argument("--num-workers",    type=int,   default=tc.num_workers)
-    p.add_argument("--checkpoint",     default="checkpoints/best_xlmr.pt",
-                   help="Path to save best model checkpoint")
-    p.add_argument("--results",        default="results/train_results.pkl",
-                   help="Path to save final results + history")
-    p.add_argument("--results-json", default=None, metavar="PATH",
+    p.add_argument("--checkpoint",     default=None,
+                   help="Path to save best model checkpoint (default: checkpoints/best_<backbone>.pt)")
+    p.add_argument("--results",        default=None,
+                   help="Path to save final results + history (default: results/train_<backbone>.pkl)")
+    p.add_argument("--results-json",   default=None, metavar="PATH",
                    help="Also save the same metrics payload as JSON (optional)")
     return p.parse_args()
 
 
 def main() -> None:
     args = parse_args()
+
+    model_name = args.model or BACKBONE_MODEL_DEFAULTS[args.backbone]
 
     train_config = TrainConfig(
         batch_size=args.batch_size,
@@ -98,11 +113,15 @@ def main() -> None:
         num_workers=args.num_workers,
     )
     model_config = ModelConfig(
-        model_name=args.model,
+        backbone=args.backbone,
+        model_name=model_name,
         max_len=args.max_len,
         dropout=args.dropout,
         freeze_encoder=args.freeze_encoder,
     )
+
+    ckpt_path    = Path(args.checkpoint or f"checkpoints/best_{args.backbone}.pt")
+    results_path = Path(args.results    or f"results/train_{args.backbone}.pkl")
 
     train_pairs    = [parse_pair(p) for p in args.train_pairs]    if args.train_pairs    else TRAIN_PAIRS
     zeroshot_pairs = [parse_pair(p) for p in args.zeroshot_pairs] if args.zeroshot_pairs else ZEROSHOT_PAIRS
@@ -110,14 +129,15 @@ def main() -> None:
     set_seed(train_config.seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"✓ Device: {device}")
+    print(f"  Backbone: {args.backbone}  |  Model: {model_name}")
 
     print(f"\nLoading preprocessed data: {args.data}")
     with open(args.data, "rb") as f:
         all_stats = pickle.load(f)
     print(f"  Loaded {len(all_stats)} language pairs")
 
-    print(f"\nLoading tokenizer: {model_config.model_name}")
-    tokenizer = XLMRobertaTokenizer.from_pretrained(model_config.model_name)
+    print(f"\nLoading tokenizer: {model_name}")
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
     collate   = make_collate_fn(tokenizer.pad_token_id)
 
     gc.collect()
@@ -146,11 +166,7 @@ def main() -> None:
     sw_criterion  = nn.CrossEntropyLoss(weight=sw_w,  ignore_index=-100)
     dur_criterion = nn.CrossEntropyLoss(weight=dur_w)
 
-    model = XLMRCodeSwitchPredictor(
-        model_name=model_config.model_name,
-        dropout=model_config.dropout,
-        freeze_encoder=model_config.freeze_encoder,
-    ).to(device)
+    model = build_model(model_config).to(device)
 
     optimizer = torch.optim.AdamW(
         [
@@ -164,14 +180,14 @@ def main() -> None:
         optimizer, T_max=train_config.num_epochs
     )
 
-    print(f"\n  Mode:        {'FROZEN encoder' if model_config.freeze_encoder else 'FULL FINE-TUNING (bidirectional)'}")
+    print(f"\n  Backbone:    {args.backbone}  ({model_name})")
+    print(f"  Mode:        {'FROZEN encoder' if model_config.freeze_encoder else 'FULL FINE-TUNING'}")
     print(f"  Encoder LR:  {train_config.base_lr}  |  Head LR: {train_config.head_lr}")
     print(f"  Train pairs: {len(train_pairs)}  |  Zero-shot: {len(zeroshot_pairs)}")
     print(f"  Batches:     {len(train_loader)} train  /  {len(val_loader)} val")
 
     history:    list[dict] = []
     best_sw_f1: float      = 0.0
-    ckpt_path              = Path(args.checkpoint)
     ckpt_path.parent.mkdir(parents=True, exist_ok=True)
 
     for epoch in range(1, train_config.num_epochs + 1):
@@ -228,10 +244,10 @@ def main() -> None:
 
     print_sigma_summary(final_train, final_zs)
 
-    # Persist results
-    results_path = Path(args.results)
     results_path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
+        "backbone":         args.backbone,
+        "model_name":       model_name,
         "history":          history,
         "train_results":    final_train,
         "zeroshot_results": final_zs,
