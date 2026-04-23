@@ -1,5 +1,5 @@
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Tuple
 
 # ── Language pairs ────────────────────────────────────────────────────────────
@@ -71,7 +71,7 @@ class ModelConfig:
     lid_model:      str   = "papluca/xlm-roberta-base-language-detection"
     dropout:        float = 0.1
     freeze_encoder: bool  = False
-    max_len:        int   = 128
+    max_len:        int   = 256
 
 
 @dataclass
@@ -83,16 +83,40 @@ class DataConfig:
 
 @dataclass
 class TrainConfig:
-    batch_size:        int   = 32
-    num_epochs:        int   = 8
-    base_lr:           float = 2e-5
+    batch_size:         int   = 32
+    num_epochs:         int   = 16
+    base_lr:            float = 1e-5
     head_lr_multiplier: float = 50.0
-    weight_decay:      float = 0.01
-    grad_clip:         float = 1.0
-    lambda_dur:        float = 1.0
-    seed:              int   = 42
-    num_workers:       int   = 2
+    warmup_ratio:       float = 0.1
+    weight_decay:       float = 0.01
+    grad_clip:          float = 1.0
+    lambda_dur:         float = 1.0
+    seed:               int   = 42
+    num_workers:        int   = 2
 
     @property
     def head_lr(self) -> float:
         return self.base_lr * self.head_lr_multiplier
+
+
+@dataclass
+class BurstinessConfig:
+    """Parameters for burstiness analysis (Experiment 2)."""
+    burst_threshold: int   = 3    # min number of other switches in window to be "bursty"
+    window_size:     int   = 5    # half-window radius (checks ±window_size tokens)
+    batch_size:      int   = 32
+    train_ratio:     float = 0.8
+    max_len:         int   = 256
+    num_workers:     int   = 2
+
+
+@dataclass
+class QualitativeConfig:
+    """Parameters for qualitative CS-type analysis (Experiment 3)."""
+    pairs_to_analyze: List[str] = field(default_factory=lambda: [
+        "Korean-English", "German-English", "Chinese-English",
+        "Spanish-English", "Arabic-English",
+    ])
+    n_examples:  int   = 3     # error examples to show per confusion category
+    train_ratio: float = 0.8
+    max_len:     int   = 256

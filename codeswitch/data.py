@@ -276,6 +276,55 @@ class CodeSwitchDataset(Dataset):
 XLMRCodeSwitchDataset = CodeSwitchDataset
 
 
+class CodeSwitchDatasetWithMeta(Dataset):
+    """Like CodeSwitchDataset but keeps cs_type per item for qualitative analysis."""
+
+    def __init__(self, samples: list[dict], tokenizer, max_len: int = 256) -> None:
+        self.items: list[dict] = []
+        for s in samples:
+            if "words" in s and "word_lids" in s:
+                tokens, token_lids = align_subwords_to_words(
+                    s["words"], s["word_lids"], tokenizer
+                )
+                if len(tokens) < 2:
+                    continue
+                y_switch, y_duration = generate_labels(token_lids)
+                ids = tokenizer.convert_tokens_to_ids(tokens)
+            else:
+                ids       = tokenizer.convert_tokens_to_ids(s["tokens"])
+                y_switch  = s["y_switch"]
+                y_duration = s["y_duration"]
+
+            ids = [tokenizer.bos_token_id] + ids + [tokenizer.eos_token_id]
+
+            sw_raw  = [x if x != -1 else -100 for x in y_switch]
+            dur_raw = [x if x != -1 else -100 for x in y_duration]
+            sw  = [-100] + sw_raw  + [-100]
+            dur = [-100] + dur_raw + [-100]
+
+            ids = ids[:max_len]
+            n   = len(ids)
+            if n < 2:
+                continue
+
+            label_len = n - 1
+            sw  = sw[:label_len]
+            dur = dur[:label_len]
+            if len(sw) != label_len or len(dur) != label_len:
+                continue
+
+            self.items.append({
+                "input_ids":  torch.tensor(ids, dtype=torch.long),
+                "y_switch":   torch.tensor(sw,  dtype=torch.long),
+                "y_duration": torch.tensor(dur, dtype=torch.long),
+                "cs_type":    s.get("cs_type",    "unknown"),
+                "cs_function": s.get("cs_function", "unknown"),
+            })
+
+    def __len__(self)        -> int:  return len(self.items)
+    def __getitem__(self, i) -> dict: return self.items[i]
+
+
 def make_collate_fn(pad_id: int):
     """Return a collate function that pads to the longest sequence in a batch."""
     def collate(batch: list[dict]) -> dict:

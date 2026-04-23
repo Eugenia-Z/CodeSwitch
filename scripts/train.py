@@ -50,7 +50,7 @@ from codeswitch.data import build_datasets, make_collate_fn
 from codeswitch.evaluate import evaluate, evaluate_per_pair, print_sigma_summary
 from codeswitch.model import build_model
 from codeswitch.results_json import save_results_json
-from codeswitch.trainer import compute_class_weights, set_seed, train_epoch
+from codeswitch.trainer import compute_class_weights, make_warmup_cosine_scheduler, set_seed, train_epoch
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
 
@@ -82,6 +82,8 @@ def parse_args() -> argparse.Namespace:
                    help="Head LR = base_lr × this multiplier")
     p.add_argument("--lambda-dur",     type=float, default=tc.lambda_dur,
                    help="Weight for duration loss (0 = switch-only)")
+    p.add_argument("--warmup-ratio",   type=float, default=tc.warmup_ratio,
+                   help="Fraction of total steps used for linear LR warmup")
     p.add_argument("--max-len",        type=int,   default=mc.max_len)
     p.add_argument("--dropout",        type=float, default=mc.dropout)
     p.add_argument("--freeze-encoder", action="store_true",
@@ -108,6 +110,7 @@ def main() -> None:
         num_epochs=args.epochs,
         base_lr=args.base_lr,
         head_lr_multiplier=args.head_lr_mul,
+        warmup_ratio=args.warmup_ratio,
         lambda_dur=args.lambda_dur,
         seed=args.seed,
         num_workers=args.num_workers,
@@ -176,9 +179,10 @@ def main() -> None:
         ],
         weight_decay=train_config.weight_decay,
     )
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-        optimizer, T_max=train_config.num_epochs
-    )
+    total_steps   = train_config.num_epochs * len(train_loader)
+    warmup_steps  = int(total_steps * train_config.warmup_ratio)
+    scheduler     = make_warmup_cosine_scheduler(optimizer, warmup_steps, total_steps)
+    print(f"  Scheduler:   warmup={warmup_steps} steps / {total_steps} total")
 
     print(f"\n  Backbone:    {args.backbone}  ({model_name})")
     print(f"  Mode:        {'FROZEN encoder' if model_config.freeze_encoder else 'FULL FINE-TUNING'}")
@@ -192,7 +196,7 @@ def main() -> None:
 
     for epoch in range(1, train_config.num_epochs + 1):
         losses   = train_epoch(model, train_loader, optimizer, device,
-                               sw_criterion, dur_criterion, train_config)
+                               sw_criterion, dur_criterion, train_config, scheduler)
         metrics  = evaluate(model, val_loader, device)
         pair_f1s = {
             k: v["switch_f1"]
@@ -204,7 +208,6 @@ def main() -> None:
                 num_workers=train_config.num_workers,
             ).items()
         }
-        scheduler.step()
 
         history.append({
             "epoch":       epoch,

@@ -1,4 +1,4 @@
-"""Training utilities: seed, class weights, single-epoch training loop."""
+"""Training utilities: seed, class weights, scheduler, single-epoch training loop."""
 from __future__ import annotations
 import random
 
@@ -6,6 +6,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
+from transformers import get_cosine_schedule_with_warmup
 from tqdm import tqdm
 
 from .config import TrainConfig
@@ -17,6 +18,15 @@ def set_seed(seed: int = 42) -> None:
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
+
+
+def make_warmup_cosine_scheduler(optimizer, num_warmup_steps: int, num_training_steps: int):
+    """Linear warmup then cosine decay LR scheduler (stepped per batch)."""
+    return get_cosine_schedule_with_warmup(
+        optimizer,
+        num_warmup_steps=num_warmup_steps,
+        num_training_steps=num_training_steps,
+    )
 
 
 def compute_class_weights(
@@ -55,6 +65,7 @@ def train_epoch(
     sw_criterion:  nn.Module,
     dur_criterion: nn.Module,
     config:        TrainConfig,
+    scheduler=None,
 ) -> dict[str, float]:
     model.train()
     sw_losses:  list[float] = []
@@ -85,6 +96,8 @@ def train_epoch(
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), config.grad_clip)
         optimizer.step()
+        if scheduler is not None:
+            scheduler.step()
 
         sw_losses.append(loss_sw.item())
         dur_losses.append(loss_dur.item())
