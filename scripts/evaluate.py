@@ -75,7 +75,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--output",         default=None,
                    help="Save results dict to this pickle path (optional)")
     p.add_argument("--results-json",   default=None, metavar="PATH",
-                   help="Save the same metrics as JSON (optional)")
+                   help="JSON output path (default: results/eval_<backbone>.json)")
     return p.parse_args()
 
 
@@ -134,10 +134,9 @@ def main() -> None:
             pickle.dump(payload, f)
         print(f"\n✓ Results saved to: {out}")
 
-    if args.results_json:
-        json_path = Path(args.results_json)
-        save_results_json(json_path, payload)
-        print(f"✓ Results (JSON) saved to: {json_path}")
+    json_path = Path(args.results_json or f"results/eval_{args.backbone}.json")
+    save_results_json(json_path, payload)
+    print(f"✓ Results (JSON) saved to: {json_path}")
 
 
 if __name__ == "__main__":
