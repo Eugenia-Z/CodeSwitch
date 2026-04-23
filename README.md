@@ -77,18 +77,16 @@ Options: `--max-samples 1000` for a quick test, `--pairs Chinese-English Hindi-E
 #### Step B — Train
 
 ```bash
-# XLM-R (default, with warmup cosine scheduler)
+# XLM-R (default) — saves results/train_xlmr.json automatically
 python scripts/train.py \
   --data data/preprocessed.pkl \
   --backbone xlmr \
-  --checkpoint checkpoints/best_xlmr.pt \
-  --results-json results/train_xlmr.json
+  --checkpoint checkpoints/best_xlmr.pt
 
-# XGLM / GPT backbone
+# XGLM / GPT backbone — saves results/train_xglm.json automatically
 python scripts/train.py \
   --backbone xglm \
-  --checkpoint checkpoints/best_xglm.pt \
-  --results-json results/train_xglm.json
+  --checkpoint checkpoints/best_xglm.pt
 
 # Switch-only (no duration auxiliary task)
 python scripts/train.py --lambda-dur 0.0 --checkpoint checkpoints/best_xlmr_st.pt
@@ -106,14 +104,15 @@ Key flags (see `python scripts/train.py --help`):
 | `--lambda-dur` | 1.0 | Duration loss weight (0 = switch-only) |
 | `--max-len` | 256 | Max token length |
 | `--freeze-encoder` | off | Freeze encoder, train heads only |
+| `--results-json` | `results/train_<backbone>.json` | Override default JSON output path |
 
 #### Step C — Evaluate a checkpoint
 
 ```bash
+# saves results/eval_xlmr.json automatically
 python scripts/evaluate.py \
   --checkpoint checkpoints/best_xlmr.pt \
-  --data data/preprocessed.pkl \
-  --results-json results/eval.json
+  --data data/preprocessed.pkl
 ```
 
 #### Step D — Burstiness analysis
